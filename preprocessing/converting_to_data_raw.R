@@ -46,10 +46,4 @@ data_raw <- data_raw %>%
   ) %>%
   ungroup()
 
-
-output_file <- "data/raw/data_raw.csv"
-if (file.exists(output_file)) {
-  file.remove(output_file)
-}
-
-write.csv(data_raw, output_file, row.names = FALSE)
+write_csv(data_raw, "data/data_raw.csv")
