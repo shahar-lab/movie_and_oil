@@ -1,17 +1,18 @@
 #### BOXPLOT VISUALIZATION ####
 
-# Okabe-Ito colorblind-safe palette
-oi_palette <- c(
-  "Reward" = "#E69F00",      # orange
-  "No Reward" = "#56B4E9"    # sky blue
+# Paul Tol 2-color colorblind-safe palette for participants
+unique_participants <- sort(unique(df_agg$participant_id))
+participant_palette <- setNames(
+  c("#1B9E77", "#D95F02"),
+  unique_participants
 )
 
 # Plot for video_present == TRUE
 p_with_video <- df_agg |>
   filter(video_present == TRUE) |>
-  ggplot(aes(x = reward_label, y = avg_stay, colour = reward_label)) +
+  ggplot(aes(x = reward_label, y = avg_stay, colour = participant_id)) +
   geom_point(size = 4, alpha = 0.7) +
-  scale_colour_manual(values = oi_palette) +
+  scale_colour_manual(values = participant_palette) +
   scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
   labs(
     title = "With Movie",
@@ -29,9 +30,9 @@ p_with_video <- df_agg |>
 # Plot for video_present == FALSE
 p_without_video <- df_agg |>
   filter(video_present == FALSE) |>
-  ggplot(aes(x = reward_label, y = avg_stay, colour = reward_label)) +
+  ggplot(aes(x = reward_label, y = avg_stay, colour = participant_id)) +
   geom_point(size = 4, alpha = 0.7) +
-  scale_colour_manual(values = oi_palette) +
+  scale_colour_manual(values = participant_palette) +
   scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
   labs(
     title = "Without Movie",

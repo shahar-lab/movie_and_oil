@@ -15,6 +15,7 @@ df_analysis <- df |>
 #### AGGREGATE TO SUBJECT LEVEL ####
 
 df_agg <- df_analysis |>
+  mutate(participant_id = as.character(participant_id)) |>
   group_by(participant_id, reward_label, video_present) |>
   summarise(
     avg_stay = mean(stay_card, na.rm = TRUE),
