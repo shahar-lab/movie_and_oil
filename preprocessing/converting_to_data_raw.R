@@ -54,6 +54,14 @@ data_raw <- data_raw |>
         card_up == lag(chosen_card) | card_down == lag(chosen_card),
         1, 0
       )
+    ),
+    can_stay_side = if_else(
+      is.na(lag(card_up)) | is.na(lag(card_down)),
+      0,
+      if_else(
+        (card_up != lag(card_up)) | (card_down != lag(card_down)),
+        1, 0
+      )
     )
   ) |>
   ungroup()
