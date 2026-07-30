@@ -1,19 +1,6 @@
 #### LOAD AND PREPARE DATA ####
 
-df <- read_csv(data_path, show_col_types = FALSE) |>
-  group_by(participant_id) |>
-  mutate(
-    # ASSUMED[no column in raw]: recreate can_stay from preprocessing logic
-    can_stay = if_else(
-      is.na(lag(chosen_card)),
-      0,
-      if_else(
-        card_up == lag(chosen_card) | card_down == lag(chosen_card),
-        1, 0
-      )
-    )
-  ) |>
-  ungroup()
+df <- read_csv(data_path, show_col_types = FALSE)
 
 #### FILTER DATA ####
 
