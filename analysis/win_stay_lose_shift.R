@@ -11,7 +11,7 @@ data_analysis <- data_raw %>%
 models <- data_analysis %>%
   nest(data = -participant_id) %>%
   mutate(
-    model = map(data, ~glm(stay_card ~ reward_previous_trial,
+    model = map(data, ~glm(stay_card ~ reward_previous_trial + video_present,
                            family = binomial(link = "logit"),
                            data = .x)),
     summary = map(model, summary)
