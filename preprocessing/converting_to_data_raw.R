@@ -1,10 +1,14 @@
 rm(list = ls())
 library(tidyverse)
+install.packages("here")
+library(here)
 
-data <- list.files("data/collected", pattern = "\\.csv$", full.names = TRUE) |>
+project_root <- here::here()
+
+data <- list.files(file.path(project_root, "data", "collected"), pattern = "\\.csv$", full.names = TRUE) |>
   map_df(read_csv, col_types = cols(.default = col_character()))
 
-data_raw <- data %>%
+data_raw <- data |>
   select(
     prolific_pid,
     participant_id,
@@ -24,11 +28,11 @@ data_raw <- data %>%
     trial,
     trial_in_block,
     video_present
-  ) %>%
+  ) |>
   filter(screen_id == "main_trial")
 
-data_raw <- data_raw %>%
-  group_by(participant_id) %>%
+data_raw <- data_raw |>
+  group_by(participant_id) |>
   mutate(
     is_correct = if_else(
       p_win_chosen == pmax(p_win_up, p_win_down),
@@ -42,8 +46,30 @@ data_raw <- data_raw %>%
     stay_key = if_else(
       chosen_side == lead(chosen_side),
       1, 0
+    ),
+    can_stay = if_else(
+      is.na(lag(chosen_card)),
+      0,
+      if_else(
+        card_up == lag(chosen_card) | card_down == lag(chosen_card),
+        1, 0
+      )
     )
-  ) %>%
+  ) |>
   ungroup()
 
-write_csv(data_raw, "data/data_raw.csv")
+#### VALIDATION ####
+
+cat("Row counts:\n")
+cat("  Input rows: ", nrow(data), "\n")
+cat("  Output rows: ", nrow(data_raw), "\n")
+
+cat("\nMissing values per column:\n")
+print(colSums(is.na(data_raw)))
+
+cat("\nVariable types:\n")
+str(data_raw)
+
+#### WRITE OUTPUT ####
+
+write_csv(data_raw, file.path(project_root, "data", "raw", "data_raw.csv"))
