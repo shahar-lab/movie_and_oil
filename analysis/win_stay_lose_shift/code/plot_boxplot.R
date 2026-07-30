@@ -9,9 +9,9 @@ oi_palette <- c(
 # Plot for video_present == TRUE
 p_with_video <- df_agg |>
   filter(video_present == TRUE) |>
-  ggplot(aes(x = reward_label, y = avg_stay, fill = reward_label)) +
-  geom_boxplot(alpha = 0.7, outlier.alpha = 0.5) +
-  scale_fill_manual(values = oi_palette) +
+  ggplot(aes(x = reward_label, y = avg_stay, colour = reward_label)) +
+  geom_point(size = 4, alpha = 0.7) +
+  scale_colour_manual(values = oi_palette) +
   scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
   labs(
     title = "With Movie",
@@ -29,9 +29,9 @@ p_with_video <- df_agg |>
 # Plot for video_present == FALSE
 p_without_video <- df_agg |>
   filter(video_present == FALSE) |>
-  ggplot(aes(x = reward_label, y = avg_stay, fill = reward_label)) +
-  geom_boxplot(alpha = 0.7, outlier.alpha = 0.5) +
-  scale_fill_manual(values = oi_palette) +
+  ggplot(aes(x = reward_label, y = avg_stay, colour = reward_label)) +
+  geom_point(size = 4, alpha = 0.7) +
+  scale_colour_manual(values = oi_palette) +
   scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
   labs(
     title = "Without Movie",
