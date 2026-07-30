@@ -1,7 +1,5 @@
 rm(list = ls())
 
-# REVIEW[project-rules §2 II]: Numbered scripts (01_prepare_data.R, 02_plot_boxplot.R) exist in code/ but must not be present
-
 #### SETUP ####
 
 library(here)
