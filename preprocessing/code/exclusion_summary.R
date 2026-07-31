@@ -127,29 +127,44 @@ table_for_pdf <- exclusion_table |>
     Pct_Video
   )
 
-# Export to PDF using gridExtra
-pdf_file <- file.path(output_dir, "exclusion_summary.pdf")
+# Export to PNG using gridExtra with improved formatting
+png_file <- file.path(output_dir, "exclusion_summary.png")
 
-grDevices::pdf(pdf_file, width = 10, height = nrow(table_for_pdf) * 0.3 + 2)
+grDevices::png(
+  filename = png_file,
+  width = 12,
+  height = 8,
+  units = "in",
+  res = 300,
+  bg = "white"
+)
+
 gridExtra::grid.arrange(
   gridExtra::tableGrob(
     table_for_pdf,
     rows = NULL,
     theme = gridExtra::ttheme_default(
-      core = list(fg_params = list(hjust = 0, x = 0.1)),
-      colhead = list(fg_params = list(hjust = 0.5, x = 0.5))
+      core = list(
+        fg_params = list(hjust = 0.5, x = 0.5, fontsize = 11, fontface = "plain"),
+        bg_params = list(fill = "white")
+      ),
+      colhead = list(
+        fg_params = list(hjust = 0.5, x = 0.5, fontsize = 12, fontface = "bold"),
+        bg_params = list(fill = "#E8E8E8")
+      ),
+      padding = grid::unit(c(12, 8), "mm")
     )
   ),
   top = grid::textGrob(
     "Trial Exclusion Summary per Participant",
-    gp = grid::gpar(fontsize = 14, fontface = "bold")
+    gp = grid::gpar(fontsize = 16, fontface = "bold")
   ),
   bottom = grid::textGrob(
     paste("Data source:", data_raw_path, "\nGenerated:", Sys.time()),
-    gp = grid::gpar(fontsize = 10, fontface = "italic")
+    gp = grid::gpar(fontsize = 11, fontface = "italic")
   ),
-  heights = grid::unit(c(0.1, 0.8, 0.1), "npc")
+  heights = grid::unit(c(0.20, 0.70, 0.1), "npc")
 )
 grDevices::dev.off()
 
-cat("Exclusion summary report generated: ", pdf_file, "\n")
+cat("Exclusion summary report generated: ", png_file, "\n")
