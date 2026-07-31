@@ -78,7 +78,6 @@ prolific_pid,participant_id,screen_id,card_up,card_down,chosen_card,chosen_side,
 66cc6eb364154a51d4d44eb1,wdoh5wcf,main_trial,1,3,1,up,596,loss,0.1841,0.1841,0.8528,-1,-9,2,77,27,true,ok,0,-1,0,1,0,1
 66cc6eb364154a51d4d44eb1,wdoh5wcf,main_trial,3,1,3,up,1340,win,0.8762,0.8762,0.1329,1,-8,2,78,28,true,ok,1,-1,1,1,1,1
 66cc6eb364154a51d4d44eb1,wdoh5wcf,main_trial,3,1,3,up,814,win,0.8359,0.8359,0.16,1,-7,2,79,29,true,ok,1,1,0,1,1,0
-66cc6eb364154a51d4d44eb1,wdoh5wcf,main_trial,2,1,2,up,3166,loss,0.5503,0.5503,0.1632,-1,-8,2,80,30,true,ok,1,1,0,0,0,1
 66cc6eb364154a51d4d44eb1,wdoh5wcf,main_trial,2,3,3,down,1105,loss,0.8268,0.6189,0.8268,-1,-9,2,81,31,true,ok,1,-1,0,1,1,1
 66cc6eb364154a51d4d44eb1,wdoh5wcf,main_trial,3,1,1,down,1373,loss,0.1712,0.798,0.1712,-1,-10,2,82,32,true,ok,0,-1,1,0,1,1
 66cc6eb364154a51d4d44eb1,wdoh5wcf,main_trial,1,3,1,up,715,loss,0.1813,0.1813,0.8919,-1,-11,2,83,33,true,ok,0,-1,0,1,1,1
@@ -270,7 +269,6 @@ NA,yerl9g4z,main_trial,3,4,4,down,1238,win,0.3094,0.5767,0.3094,1,12,2,68,18,tru
 NA,yerl9g4z,main_trial,3,1,1,down,634,win,0.6363,0.5293,0.6363,1,13,2,69,19,true,ok,1,1,1,0,0,1
 NA,yerl9g4z,main_trial,1,3,1,up,1071,win,0.6179,0.6179,0.5419,1,14,2,70,20,true,ok,1,1,0,1,1,1
 NA,yerl9g4z,main_trial,4,2,4,up,1297,loss,0.2833,0.2833,0.5723,-1,13,2,71,21,true,ok,0,1,0,0,0,1
-NA,yerl9g4z,main_trial,4,3,3,down,3722,loss,0.5921,0.1714,0.5921,-1,12,2,72,22,true,ok,1,-1,0,0,1,1
 NA,yerl9g4z,main_trial,2,3,2,up,656,win,0.6595,0.6595,0.513,1,13,2,73,23,true,ok,1,-1,0,0,1,1
 NA,yerl9g4z,main_trial,4,3,3,down,1368,loss,0.5067,0.183,0.5067,-1,12,2,74,24,true,ok,1,1,0,0,0,1
 NA,yerl9g4z,main_trial,1,4,1,up,775,loss,0.7379,0.7379,0.151,-1,11,2,75,25,true,ok,1,-1,0,1,0,1
@@ -291,7 +289,6 @@ NA,yerl9g4z,main_trial,4,1,4,up,1003,loss,0.1107,0.1107,0.5426,-1,9,2,89,39,true
 NA,yerl9g4z,main_trial,2,4,2,up,556,win,0.7966,0.7966,0.1519,1,10,2,90,40,true,ok,1,-1,0,1,1,1
 NA,yerl9g4z,main_trial,1,3,1,up,796,win,0.6029,0.6029,0.4246,1,11,2,91,41,true,ok,1,1,0,1,0,1
 NA,yerl9g4z,main_trial,2,1,2,up,543,win,0.8851,0.8851,0.4961,1,12,2,92,42,true,ok,1,1,1,0,1,1
-NA,yerl9g4z,main_trial,3,2,2,down,3114,win,0.8971,0.3885,0.8971,1,13,2,93,43,true,ok,1,1,1,0,1,1
 NA,yerl9g4z,main_trial,2,3,2,up,521,win,0.834,0.834,0.435,1,14,2,94,44,true,ok,1,1,0,1,1,1
 NA,yerl9g4z,main_trial,1,4,1,up,766,win,0.6653,0.6653,0.1096,1,15,2,95,45,true,ok,1,1,0,0,0,1
 NA,yerl9g4z,main_trial,4,2,2,down,718,win,0.7538,0.1155,0.7538,1,16,2,96,46,true,ok,1,1,0,1,0,1
@@ -329,7 +326,6 @@ NA,yerl9g4z,main_trial,4,1,4,up,1318,loss,0.1106,0.1106,0.6163,-1,23,3,127,27,fa
 NA,yerl9g4z,main_trial,4,3,3,down,684,loss,0.5118,0.1568,0.5118,-1,22,3,128,28,false,ok,1,-1,0,0,1,1
 NA,yerl9g4z,main_trial,2,4,2,up,443,win,0.8531,0.8531,0.1591,1,23,3,129,29,false,ok,1,-1,0,1,0,1
 NA,yerl9g4z,main_trial,3,1,3,up,548,win,0.566,0.566,0.6841,1,24,3,130,30,false,ok,0,1,0,0,0,1
-NA,yerl9g4z,main_trial,4,1,1,down,3187,win,0.6248,0.2809,0.6248,1,25,3,131,31,false,ok,1,1,0,0,0,1
 NA,yerl9g4z,main_trial,2,1,2,up,808,win,0.8984,0.8984,0.6515,1,26,3,132,32,false,ok,1,1,0,1,1,1
 NA,yerl9g4z,main_trial,3,2,3,up,566,loss,0.4213,0.4213,0.8894,-1,25,3,133,33,false,ok,0,1,1,1,1,1
 NA,yerl9g4z,main_trial,3,2,3,up,1889,win,0.4778,0.4778,0.8535,1,26,3,134,34,false,ok,0,-1,1,1,1,0
@@ -339,7 +335,6 @@ NA,yerl9g4z,main_trial,4,2,2,down,970,win,0.8909,0.3022,0.8909,1,27,3,137,37,fal
 NA,yerl9g4z,main_trial,1,2,2,down,891,loss,0.8936,0.5726,0.8936,-1,26,3,138,38,false,ok,1,1,0,1,1,1
 NA,yerl9g4z,main_trial,2,3,3,down,674,win,0.5372,0.8932,0.5372,1,27,3,139,39,false,ok,0,-1,1,0,1,1
 NA,yerl9g4z,main_trial,3,1,3,up,703,loss,0.5413,0.5413,0.5338,-1,26,3,140,40,false,ok,1,1,0,1,1,1
-NA,yerl9g4z,main_trial,1,4,1,up,3160,loss,0.4601,0.4601,0.2684,-1,25,3,141,41,false,ok,1,-1,0,0,0,1
 NA,yerl9g4z,main_trial,1,4,4,down,631,win,0.2606,0.4488,0.2606,1,26,3,142,42,false,ok,0,-1,0,0,1,0
 NA,yerl9g4z,main_trial,3,1,3,up,1007,loss,0.5679,0.5679,0.4504,-1,25,3,143,43,false,ok,1,1,0,1,0,1
 NA,yerl9g4z,main_trial,2,4,2,up,1239,loss,0.7782,0.7782,0.2702,-1,24,3,144,44,false,ok,1,-1,0,0,0,1

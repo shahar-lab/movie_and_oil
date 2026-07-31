@@ -11,7 +11,7 @@ project_root <- here::here()
 code_dir     <- file.path(project_root, "analysis", "win_stay_lose_shift", "code")
 artifacts_dir <- file.path(project_root, "analysis", "win_stay_lose_shift", "artifacts")
 output_dir   <- file.path(project_root, "analysis", "win_stay_lose_shift", "output")
-data_path    <- file.path(project_root, "data", "raw", "data_raw.csv")
+data_path    <- file.path(project_root, "data", "processed", "data_processed.csv")
 
 #### EXECUTE PIPELINE ####
 
