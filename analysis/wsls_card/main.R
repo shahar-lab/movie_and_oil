@@ -8,9 +8,9 @@ library(ggplot2)
 library(patchwork)
 
 project_root <- here::here()
-code_dir     <- file.path(project_root, "analysis", "win_stay_lose_shift", "code")
-artifacts_dir <- file.path(project_root, "analysis", "win_stay_lose_shift", "artifacts")
-output_dir   <- file.path(project_root, "analysis", "win_stay_lose_shift", "output")
+code_dir     <- file.path(project_root, "analysis", "wsls_card", "code")
+artifacts_dir <- file.path(project_root, "analysis", "wsls_card", "artifacts")
+output_dir   <- file.path(project_root, "analysis", "wsls_card", "output")
 data_path    <- file.path(project_root, "data", "raw", "data_raw.csv")
 
 #### EXECUTE PIPELINE ####

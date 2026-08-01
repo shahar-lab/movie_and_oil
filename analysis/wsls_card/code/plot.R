@@ -1,12 +1,5 @@
 #### BOXPLOT VISUALIZATION ####
 
-# Paul Tol 2-color colorblind-safe palette for participants
-unique_participants <- sort(unique(df_agg$participant_id))
-participant_palette <- setNames(
-  c("#1B9E77", "#D95F02"),
-  unique_participants
-)
-
 # Plot for video_present == TRUE
 p_with_video <- df_agg |>
   filter(video_present == TRUE) |>
@@ -47,9 +40,51 @@ p_without_video <- df_agg |>
     axis.text = element_text(size = 10)
   )
 
+#### GROUP-LEVEL PLOTS ####
+
+# Group-level plot for video_present == TRUE
+p_group_with_video <- df_agg |>
+  filter(video_present == TRUE) |>
+  ggplot(aes(x = reward_label, y = avg_stay)) +
+  stat_summary(fun = mean, geom = "point", size = 4, alpha = 0.8, color = "black") +
+  stat_summary(fun = mean, geom = "line", aes(group = 1), color = "black", linewidth = 1.5, linetype = "solid") +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
+  labs(
+    title = "With Movie - Group Level",
+    x = "Previous Trial Outcome",
+    y = "Average Stay Probability"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 12),
+    axis.title = element_text(size = 11),
+    axis.text = element_text(size = 10)
+  )
+
+# Group-level plot for video_present == FALSE
+p_group_without_video <- df_agg |>
+  filter(video_present == FALSE) |>
+  ggplot(aes(x = reward_label, y = avg_stay)) +
+  stat_summary(fun = mean, geom = "point", size = 4, alpha = 0.8, color = "black") +
+  stat_summary(fun = mean, geom = "line", aes(group = 1), color = "black", linewidth = 1.5, linetype = "solid") +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
+  labs(
+    title = "Without Movie - Group Level",
+    x = "Previous Trial Outcome",
+    y = "Average Stay Probability"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 12),
+    axis.title = element_text(size = 11),
+    axis.text = element_text(size = 10)
+  )
+
 #### ASSEMBLE AND TAG PANELS ####
 
-p_final <- (p_with_video | p_without_video) +
+p_final <- (p_with_video / p_group_with_video) | (p_without_video / p_group_without_video) +
   plot_annotation(tag_levels = "A") &
   theme(plot.tag = element_text(face = "bold", size = 14))
 
