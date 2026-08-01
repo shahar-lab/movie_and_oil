@@ -127,44 +127,94 @@ table_for_pdf <- exclusion_table |>
     Pct_Video
   )
 
-# Export to PNG using gridExtra with improved formatting
+# Identify entirely excluded participants
+entirely_excluded <- exclusion_summary |>
+  dplyr::filter(pct_removed == 100) |>
+  dplyr::mutate(
+    Participant_ID = as.character(participant_id),
+    Trials_Raw = n_trials_raw,
+    Trials_Removed = n_removed
+  ) |>
+  dplyr::select(Participant_ID, Trials_Raw, Trials_Removed)
+
+# Create table grob for entirely excluded participants
+table_excluded_grob <- gridExtra::tableGrob(
+  entirely_excluded,
+  rows = NULL,
+  theme = gridExtra::ttheme_default(
+    core = list(
+      fg_params = list(hjust = 0.5, x = 0.5, fontsize = 10, fontface = "plain"),
+      bg_params = list(fill = "white")
+    ),
+    colhead = list(
+      fg_params = list(hjust = 0.5, x = 0.5, fontsize = 11, fontface = "bold"),
+      bg_params = list(fill = "#E8E8E8")
+    ),
+    padding = grid::unit(c(8, 6), "mm")
+  )
+)
+
+# Create table grob for complete exclusion summary
+table_summary_grob <- gridExtra::tableGrob(
+  table_for_pdf,
+  rows = NULL,
+  theme = gridExtra::ttheme_default(
+    core = list(
+      fg_params = list(hjust = 0.5, x = 0.5, fontsize = 10, fontface = "plain"),
+      bg_params = list(fill = "white")
+    ),
+    colhead = list(
+      fg_params = list(hjust = 0.5, x = 0.5, fontsize = 11, fontface = "bold"),
+      bg_params = list(fill = "#E8E8E8")
+    ),
+    padding = grid::unit(c(8, 6), "mm")
+  )
+)
+
+# Create title text grobs
+title_excluded <- grid::textGrob(
+  "ENTIRELY EXCLUDED PARTICIPANTS",
+  gp = grid::gpar(fontsize = 13, fontface = "bold")
+)
+
+title_summary <- grid::textGrob(
+  "COMPLETE EXCLUSION SUMMARY",
+  gp = grid::gpar(fontsize = 13, fontface = "bold")
+)
+
+footer <- grid::textGrob(
+  paste("Data source:", data_raw_path, "\nGenerated:", Sys.time()),
+  gp = grid::gpar(fontsize = 10, fontface = "italic")
+)
+
+# Create spacer grobs
+spacer_small <- grid::textGrob("", gp = grid::gpar(fontsize = 1))
+spacer_medium <- grid::textGrob("", gp = grid::gpar(fontsize = 3))
+
+# Export to PNG using two-section layout
 png_file <- file.path(output_dir, "exclusion_summary.png")
 
 grDevices::png(
   filename = png_file,
   width = 12,
-  height = 8,
+  height = 10,
   units = "in",
   res = 300,
   bg = "white"
 )
 
 gridExtra::grid.arrange(
-  gridExtra::tableGrob(
-    table_for_pdf,
-    rows = NULL,
-    theme = gridExtra::ttheme_default(
-      core = list(
-        fg_params = list(hjust = 0.5, x = 0.5, fontsize = 11, fontface = "plain"),
-        bg_params = list(fill = "white")
-      ),
-      colhead = list(
-        fg_params = list(hjust = 0.5, x = 0.5, fontsize = 12, fontface = "bold"),
-        bg_params = list(fill = "#E8E8E8")
-      ),
-      padding = grid::unit(c(12, 8), "mm")
-    )
-  ),
-  top = grid::textGrob(
-    "Trial Exclusion Summary per Participant",
-    gp = grid::gpar(fontsize = 16, fontface = "bold")
-  ),
-  bottom = grid::textGrob(
-    paste("Data source:", data_raw_path, "\nGenerated:", Sys.time()),
-    gp = grid::gpar(fontsize = 11, fontface = "italic")
-  ),
-  heights = grid::unit(c(0.20, 0.70, 0.1), "npc")
+  title_excluded,
+  table_excluded_grob,
+  spacer_small,
+  title_summary,
+  table_summary_grob,
+  spacer_medium,
+  footer,
+  nrow = 7,
+  heights = grid::unit(c(0.015, 0.17, 0.005, 0.02, 0.68, 0.01, 0.1), "npc")
 )
+
 grDevices::dev.off()
 
 cat("Exclusion summary report generated: ", png_file, "\n")
