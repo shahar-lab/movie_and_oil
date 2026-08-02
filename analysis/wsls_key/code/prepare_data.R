@@ -7,24 +7,48 @@ cat("Participant IDs:", paste(sort(unique(df$participant_id)), collapse = ", "),
 
 #### FILTER DATA ####
 
-# Step-by-step filtering to see where data is lost
+# Step 1: remove trials without a previous trial
 df_step1 <- df |>
+  arrange(participant_id, trial) |> 
   group_by(participant_id) |>
-  filter(!is.na(lag(offer_up)))
-cat("After removing first trials (lag NA):", nrow(df_step1), "rows\n")
-
-df_step2 <- df_step1 |>
-  filter(!(lag(offer_up) %in% c(offer_up, offer_down)) &
-          !(lag(offer_down) %in% c(offer_up, offer_down))) |>
+  filter(
+    !is.na(lag(offer_up)),
+    !is.na(lag(offer_down))
+  ) |>
   ungroup()
+
+cat("After removing first trials:", nrow(df_step1), "rows\n")
+
+
+# Step 2: keep trials in which neither previous offer
+# appears in the current trial
+df_step2 <- df |>
+  arrange(participant_id, trial) |>
+  group_by(participant_id) |>
+  filter(
+    !is.na(lag(offer_up)),
+    !is.na(lag(offer_down)),
+    lag(offer_up) != offer_up,
+    lag(offer_up) != offer_down,
+    lag(offer_down) != offer_up,
+    lag(offer_down) != offer_down
+  ) |>
+  ungroup()
+
 cat("After offer-change filter:", nrow(df_step2), "rows\n")
 
+
+# Step 3: prepare the final analysis data
 df_analysis <- df_step2 |>
   filter(!is.na(reward_oneback)) |>
-  mutate(reward_oneback = factor(reward_oneback, levels = c("loss", "win")))
+  mutate(
+    reward_oneback = factor(
+      reward_oneback,
+      levels = c("loss", "win")
+    )
+  )
 
-cat("After filtering reward_oneback NA:", nrow(df_analysis), "| Unique participants:", n_distinct(df_analysis$participant_id), "\n")
-
+cat("Final analysis data:", nrow(df_analysis), "rows\n")
 #### AGGREGATE TO SUBJECT LEVEL ####
 
 df_agg <- df_analysis |>
