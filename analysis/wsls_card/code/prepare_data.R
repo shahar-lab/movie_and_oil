@@ -1,6 +1,9 @@
 #### LOAD AND PREPARE DATA ####
 
 df <- read_csv(data_path, show_col_types = FALSE)
+cat("LOADED FROM:", data_path, "\n")
+cat("Total rows loaded:", nrow(df), "| Unique participants:", n_distinct(df$participant_id), "\n")
+cat("Participant IDs:", paste(sort(unique(df$participant_id)), collapse = ", "), "\n")
 
 #### FILTER DATA ####
 
@@ -10,6 +13,8 @@ df_analysis <- df |>
   ungroup() |>
   filter(!is.na(reward_oneback)) |>
   mutate(reward_oneback = factor(reward_oneback, levels = c("loss", "win")))
+
+cat("After filtering:", nrow(df_analysis), "| Unique participants:", n_distinct(df_analysis$participant_id), "\n")
 
 #### AGGREGATE TO SUBJECT LEVEL ####
 
@@ -21,12 +26,23 @@ df_agg <- df_analysis |>
     .groups = "drop"
   )
 
-#### CREATE COLORBLIND-SAFE 8-COLOR PALETTE ####
+cat("Aggregated data points:", nrow(df_agg), "\n")
+cat("Unique participants in agg data:", n_distinct(df_agg$participant_id), "\n")
+cat("\nParticipants appearing in each condition:\n")
+cat("With video:", paste(sort(unique(df_agg$participant_id[df_agg$video_present == TRUE])), collapse = ", "), "\n")
+cat("Without video:", paste(sort(unique(df_agg$participant_id[df_agg$video_present == FALSE])), collapse = ", "), "\n")
+cat("\nData structure:\n")
+print(table(df_agg$video_present, df_agg$reward_oneback))
+
+#### CREATE COLORBLIND-SAFE PALETTE ####
 
 unique_participants <- sort(unique(df_agg$participant_id))
-palette_8 <- c("#1B9E77", "#D95F02", "#7570B3", "#E7298A",
-               "#66A61E", "#E6AB02", "#A6761D", "#F0027F")
-participant_palette <- setNames(
-  palette_8[seq_along(unique_participants)],
-  unique_participants
-)
+palette_base <- c("#1B9E77", "#D95F02", "#7570B3", "#E7298A",
+                  "#66A61E", "#E6AB02", "#A6761D", "#F0027F")
+n_participants <- length(unique_participants)
+palette_extended <- if (n_participants <= length(palette_base)) {
+  palette_base[seq_len(n_participants)]
+} else {
+  c(palette_base, grDevices::hcl.colors(n_participants - length(palette_base), "viridis"))
+}
+participant_palette <- setNames(palette_extended, unique_participants)
