@@ -5,18 +5,20 @@ df <- read_csv(data_path, show_col_types = FALSE)
 #### FILTER DATA ####
 
 df_analysis <- df |>
-  filter(can_stay_side == 1) |>
-  filter(!is.na(reward_previous_trial)) |>
-  mutate(
-    reward_binary = if_else(reward_previous_trial > 0, 1, 0),
-    reward_label = if_else(reward_binary == 1, "Reward", "No Reward")
-  )
+  group_by(participant_id) |>
+  filter(
+    !is.na(lag(offer_up)),
+    !(lag(offer_up) %in% c(offer_up, offer_down)) & !(lag(offer_down) %in% c(offer_up, offer_down))
+  ) |>
+  ungroup() |>
+  filter(!is.na(reward_oneback)) |>
+  mutate(reward_oneback = factor(reward_oneback, levels = c("loss", "win")))
 
 #### AGGREGATE TO SUBJECT LEVEL ####
 
 df_agg <- df_analysis |>
   mutate(participant_id = as.character(participant_id)) |>
-  group_by(participant_id, reward_label, video_present) |>
+  group_by(participant_id, reward_oneback, video_present) |>
   summarise(
     avg_stay_key = mean(stay_key, na.rm = TRUE),
     .groups = "drop"

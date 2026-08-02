@@ -4,63 +4,47 @@ data <- list.files(data_collected_dir, pattern = "\\.csv$", full.names = TRUE) |
   purrr::map_df(readr::read_csv, col_types = readr::cols(.default = readr::col_character()))
 
 data_raw <- data |>
-  dplyr::select(
+  select(
+    #participant
     prolific_pid,
     participant_id,
-    screen_id,
-    card_up,
-    card_down,
-    chosen_card,
-    chosen_side,
-    rt_ms,
-    outcome,
+
+    #block variables
+    block,
+    trial,
+    trial_in_block,
+    video_present,
+
+    #trial variables
+    offer_up = card_up,
+    offer_down = card_down,
+    choice_card = chosen_card,
+    choice_key = chosen_side,
+    rt = rt_ms,
+    reward = outcome,
+
+    #enviorment variables
     p_win_chosen,
     p_win_up,
     p_win_down,
     coins_delta,
     coins_total,
-    block,
-    trial,
-    trial_in_block,
-    video_present,
+
+    #validation variables
+    screen_id,
     window_status
   ) |>
-  dplyr::filter(screen_id == "main_trial")
+  filter(screen_id == "main_trial")
 
 data_raw <- data_raw |>
-  dplyr::group_by(participant_id) |>
-  dplyr::mutate(
-    is_correct = dplyr::if_else(
-      p_win_chosen == pmax(p_win_up, p_win_down),
-      1, 0
-    ),
-    reward_previous_trial = dplyr::lag(coins_delta),
-    stay_card = dplyr::if_else(
-      chosen_card == dplyr::lead(chosen_card),
-      1, 0
-    ),
-    stay_key = dplyr::if_else(
-      chosen_side == dplyr::lead(chosen_side),
-      1, 0
-    ),
-    can_stay = dplyr::if_else(
-      is.na(dplyr::lag(chosen_card)),
-      0,
-      dplyr::if_else(
-        card_up == dplyr::lag(chosen_card) | card_down == dplyr::lag(chosen_card),
-        1, 0
-      )
-    ),
-    can_stay_side = dplyr::if_else(
-      is.na(dplyr::lag(card_up)) | is.na(dplyr::lag(card_down)),
-      0,
-      dplyr::if_else(
-        (card_up != dplyr::lag(card_up)) | (card_down != dplyr::lag(card_down)),
-        1, 0
-      )
-    )
+  group_by(participant_id) |>
+  mutate(
+    is_correct = if_else(p_win_chosen == pmax(p_win_up, p_win_down), 1, 0),
+    reward_oneback = lag(reward),
+    stay_card = if_else(choice_card == lag(choice_card), 1, 0),
+    stay_key = if_else(choice_key == lag(choice_key), 1, 0)
   ) |>
-  dplyr::ungroup()
+  ungroup()
 
 #### VALIDATION ####
 

@@ -1,70 +1,92 @@
-#### EXCLUSION SUMMARY REPORT ####
+#### EXCLUSION SUMMARY: DATA AND CRITERIA ####
 
-output_dir <- file.path(project_root, "preprocessing", "output")
-dir.create(output_dir, showWarnings = FALSE)
-
-# Load both datasets
-df_raw <- readr::read_csv(
+# Load both datasets under report-local names, so this script never overwrites the objects
+# converting_to_data_processed.R left in the global environment
+df_raw_report <- read_csv(
   data_raw_path,
-  col_types = readr::cols(.default = readr::col_character())
+  col_types = cols(.default = col_character())
 ) |>
-  dplyr::mutate(
+  mutate(
     participant_id = as.character(participant_id),
-    rt_ms          = as.numeric(rt_ms),
+    rt             = as.numeric(rt),
     video_present  = as.logical(video_present)
   )
 
-df_processed <- readr::read_csv(
+df_processed_report <- read_csv(
   file.path(data_processed_dir, "data_processed.csv"),
-  col_types = readr::cols(.default = readr::col_character())
+  col_types = cols(.default = col_character())
 ) |>
-  dplyr::mutate(
+  mutate(
     participant_id = as.character(participant_id),
-    rt_ms          = as.numeric(rt_ms),
+    rt             = as.numeric(rt),
     video_present  = as.logical(video_present)
   )
 
-# Identify removed rows by row number or unique identifiers
-# Create a marker column to identify which rows are in processed data
-df_raw <- df_raw |>
-  dplyr::mutate(
-    row_id = dplyr::row_number()
+# Recompute the two participant-level exclusion criteria directly from df_raw_report, so this
+# report is self-contained and derived from data rather than copy-pasted counts.
+# Named *_table (not *_subjects) to avoid shadowing the character-vector objects that
+# converting_to_data_processed.R leaves in the global env for manuscript_paragraph.R.
+window_exit_table <- df_raw_report |>
+  group_by(participant_id) |>
+  summarise(n_exits = sum(window_status != "ok")) |>
+  filter(n_exits > window_exit_max)
+
+after_window_exit_report <- df_raw_report |>
+  filter(!participant_id %in% window_exit_table$participant_id)
+
+# Compare the unrounded pct to rt_trim_pct_max (matches converting_to_data_processed.R);
+# round only for display, after filtering.
+rt_trim_table <- after_window_exit_report |>
+  group_by(participant_id) |>
+  summarise(pct_outside_bounds = 100 * mean(rt < rt_min | rt > rt_max, na.rm = TRUE)) |>
+  filter(pct_outside_bounds > rt_trim_pct_max) |>
+  mutate(pct_outside_bounds = round(pct_outside_bounds, 2))
+
+both_criteria_survivors <- setdiff(
+  unique(df_raw_report$participant_id),
+  c(window_exit_table$participant_id, rt_trim_table$participant_id)
+)
+
+df_raw_report <- df_raw_report |>
+  mutate(row_id = row_number())
+
+df_processed_report <- df_processed_report |>
+  mutate(row_id = row_number())
+
+# Rows present in raw but not in processed, restricted to participants who survived both
+# participant-level exclusions: the trial-level RT filter only applies to them, and the
+# participants excluded above are accounted for by the two criterion tables instead
+removed_rows <- df_raw_report |>
+  filter(participant_id %in% both_criteria_survivors) |>
+  anti_join(
+    df_processed_report,
+    by = c("prolific_pid", "participant_id", "block", "trial", "rt")
   )
 
-df_processed <- df_processed |>
-  dplyr::mutate(
-    row_id = dplyr::row_number()
-  )
+#### EXCLUSION SUMMARY: PER-PARTICIPANT TABLE ####
 
-# Find rows in raw but not in processed by participant and key variables
-removed_rows <- df_raw |>
-  dplyr::anti_join(
-    df_processed,
-    by = c("prolific_pid", "participant_id", "block", "trial", "rt_ms")
-  )
-
-# Calculate per-participant exclusion statistics
 exclusion_summary <- removed_rows |>
-  dplyr::group_by(participant_id) |>
-  dplyr::summarise(
-    n_removed = dplyr::n(),
+  group_by(participant_id) |>
+  summarise(
+    n_removed = n(),
     n_removed_with_video = sum(video_present == TRUE, na.rm = TRUE),
     .groups = "drop"
   ) |>
-  dplyr::full_join(
-    df_raw |>
-      dplyr::group_by(participant_id) |>
-      dplyr::summarise(
-        n_trials_raw = dplyr::n(),
+  full_join(
+    df_raw_report |>
+      filter(participant_id %in% both_criteria_survivors) |>
+      group_by(participant_id) |>
+      summarise(
+        n_trials_raw = n(),
         .groups = "drop"
       ),
     by = "participant_id"
   ) |>
-  dplyr::mutate(
-    n_removed = tidyr::replace_na(n_removed, 0),
-    n_removed_with_video = tidyr::replace_na(n_removed_with_video, 0)
+  mutate(
+    n_removed = replace_na(n_removed, 0),
+    n_removed_with_video = replace_na(n_removed_with_video, 0)
   ) |>
-  dplyr::mutate(
+  mutate(
     pct_removed = ifelse(
       n_trials_raw > 0,
       round(100 * n_removed / n_trials_raw, 2),
@@ -76,7 +98,7 @@ exclusion_summary <- removed_rows |>
       0
     )
   ) |>
-  dplyr::select(
+  select(
     participant_id,
     n_trials_raw,
     n_removed,
@@ -84,33 +106,32 @@ exclusion_summary <- removed_rows |>
     n_removed_with_video,
     pct_removed_with_video
   ) |>
-  dplyr::arrange(participant_id)
+  arrange(participant_id)
 
-# Calculate overall summary row
-total_raw             <- sum(exclusion_summary$n_trials_raw)
-total_removed         <- sum(exclusion_summary$n_removed)
-total_pct_removed     <- round(100 * total_removed / total_raw, 2)
-total_removed_video   <- sum(exclusion_summary$n_removed_with_video)
-total_pct_video       <- round(100 * total_removed_video / total_removed, 2)
+total_raw           <- sum(exclusion_summary$n_trials_raw)
+total_removed       <- sum(exclusion_summary$n_removed)
+total_pct_removed   <- round(100 * total_removed / total_raw, 2)
+total_removed_video <- sum(exclusion_summary$n_removed_with_video)
+total_pct_video     <- round(100 * total_removed_video / total_removed, 2)
 
-overall_summary <- tibble::tibble(
-  participant_id        = "OVERALL",
-  n_trials_raw          = total_raw,
-  n_removed             = total_removed,
-  pct_removed           = total_pct_removed,
-  n_removed_with_video  = total_removed_video,
+overall_summary <- tibble(
+  participant_id         = "OVERALL",
+  n_trials_raw           = total_raw,
+  n_removed              = total_removed,
+  pct_removed            = total_pct_removed,
+  n_removed_with_video   = total_removed_video,
   pct_removed_with_video = total_pct_video
 )
 
-# Combine participant-level and overall summary
-exclusion_table <- dplyr::bind_rows(
+exclusion_table <- bind_rows(
   exclusion_summary,
   overall_summary
 )
 
-# Prepare table for PDF export with better column names
+#### EXCLUSION SUMMARY: TABLE GROBS ####
+
 table_for_pdf <- exclusion_table |>
-  dplyr::mutate(
+  mutate(
     Participant_ID = participant_id,
     Trials_Raw = n_trials_raw,
     Trials_Removed = n_removed,
@@ -118,7 +139,7 @@ table_for_pdf <- exclusion_table |>
     Removed_With_Video = n_removed_with_video,
     Pct_Video = as.character(pct_removed_with_video)
   ) |>
-  dplyr::select(
+  select(
     Participant_ID,
     Trials_Raw,
     Trials_Removed,
@@ -127,74 +148,59 @@ table_for_pdf <- exclusion_table |>
     Pct_Video
   )
 
-# Identify entirely excluded participants
-entirely_excluded <- exclusion_summary |>
-  dplyr::filter(pct_removed == 100) |>
-  dplyr::mutate(
-    Participant_ID = as.character(participant_id),
-    Trials_Raw = n_trials_raw,
-    Trials_Removed = n_removed
-  ) |>
-  dplyr::select(Participant_ID, Trials_Raw, Trials_Removed)
+# Table 1: participants excluded for window exits, with their exit count
+table_window_exit <- window_exit_table |>
+  rename(Participant_ID = participant_id, N_Window_Exits = n_exits)
 
-# Create table grob for entirely excluded participants
-table_excluded_grob <- gridExtra::tableGrob(
-  entirely_excluded,
-  rows = NULL,
-  theme = gridExtra::ttheme_default(
-    core = list(
-      fg_params = list(hjust = 0.5, x = 0.5, fontsize = 10, fontface = "plain"),
-      bg_params = list(fill = "white")
-    ),
-    colhead = list(
-      fg_params = list(hjust = 0.5, x = 0.5, fontsize = 11, fontface = "bold"),
-      bg_params = list(fill = "#E8E8E8")
-    ),
-    padding = grid::unit(c(8, 6), "mm")
-  )
+# Table 2: participants excluded for RT-trim-%, with their trimmed percentage
+table_rt_trim <- rt_trim_table |>
+  rename(Participant_ID = participant_id, Pct_Outside_RT_Bounds = pct_outside_bounds)
+
+# Shared theme for all table grobs below
+table_theme <- ttheme_default(
+  core = list(
+    fg_params = list(hjust = 0.5, x = 0.5, fontsize = 10, fontface = "plain"),
+    bg_params = list(fill = "white")
+  ),
+  colhead = list(
+    fg_params = list(hjust = 0.5, x = 0.5, fontsize = 11, fontface = "bold"),
+    bg_params = list(fill = "#E8E8E8")
+  ),
+  padding = unit(c(8, 6), "mm")
 )
 
-# Create table grob for complete exclusion summary
-table_summary_grob <- gridExtra::tableGrob(
-  table_for_pdf,
-  rows = NULL,
-  theme = gridExtra::ttheme_default(
-    core = list(
-      fg_params = list(hjust = 0.5, x = 0.5, fontsize = 10, fontface = "plain"),
-      bg_params = list(fill = "white")
-    ),
-    colhead = list(
-      fg_params = list(hjust = 0.5, x = 0.5, fontsize = 11, fontface = "bold"),
-      bg_params = list(fill = "#E8E8E8")
-    ),
-    padding = grid::unit(c(8, 6), "mm")
-  )
+table_window_exit_grob <- tableGrob(table_window_exit, rows = NULL, theme = table_theme)
+table_rt_trim_grob     <- tableGrob(table_rt_trim, rows = NULL, theme = table_theme)
+table_summary_grob     <- tableGrob(table_for_pdf, rows = NULL, theme = table_theme)
+
+title_window_exit <- textGrob(
+  paste0("PARTICIPANTS EXCLUDED: WINDOW EXITS (> ", window_exit_max, ")"),
+  gp = gpar(fontsize = 13, fontface = "bold")
 )
 
-# Create title text grobs
-title_excluded <- grid::textGrob(
-  "ENTIRELY EXCLUDED PARTICIPANTS",
-  gp = grid::gpar(fontsize = 13, fontface = "bold")
+title_rt_trim <- textGrob(
+  paste0("PARTICIPANTS EXCLUDED: RT-TRIM-% (> ", rt_trim_pct_max, "%)"),
+  gp = gpar(fontsize = 13, fontface = "bold")
 )
 
-title_summary <- grid::textGrob(
-  "COMPLETE EXCLUSION SUMMARY",
-  gp = grid::gpar(fontsize = 13, fontface = "bold")
+title_summary <- textGrob(
+  "COMPLETE EXCLUSION SUMMARY (SURVIVORS OF BOTH PARTICIPANT-LEVEL CRITERIA)",
+  gp = gpar(fontsize = 13, fontface = "bold")
 )
 
-footer <- grid::textGrob(
+footer <- textGrob(
   paste("Data source:", data_raw_path, "\nGenerated:", Sys.time()),
-  gp = grid::gpar(fontsize = 10, fontface = "italic")
+  gp = gpar(fontsize = 10, fontface = "italic")
 )
 
-# Create spacer grobs
-spacer_small <- grid::textGrob("", gp = grid::gpar(fontsize = 1))
-spacer_medium <- grid::textGrob("", gp = grid::gpar(fontsize = 3))
+spacer_small  <- textGrob("", gp = gpar(fontsize = 1))
+spacer_medium <- textGrob("", gp = gpar(fontsize = 3))
 
-# Export to PNG using two-section layout
+#### EXCLUSION SUMMARY: EXPORT ####
+
 png_file <- file.path(output_dir, "exclusion_summary.png")
 
-grDevices::png(
+png(
   filename = png_file,
   width = 12,
   height = 10,
@@ -203,18 +209,21 @@ grDevices::png(
   bg = "white"
 )
 
-gridExtra::grid.arrange(
-  title_excluded,
-  table_excluded_grob,
+grid.arrange(
+  title_window_exit,
+  table_window_exit_grob,
+  spacer_small,
+  title_rt_trim,
+  table_rt_trim_grob,
   spacer_small,
   title_summary,
   table_summary_grob,
   spacer_medium,
   footer,
-  nrow = 7,
-  heights = grid::unit(c(0.015, 0.17, 0.005, 0.02, 0.68, 0.01, 0.1), "npc")
+  nrow = 10,
+  heights = unit(c(0.015, 0.1, 0.005, 0.015, 0.1, 0.005, 0.02, 0.55, 0.01, 0.09), "npc")
 )
 
-grDevices::dev.off()
+dev.off()
 
 cat("Exclusion summary report generated: ", png_file, "\n")

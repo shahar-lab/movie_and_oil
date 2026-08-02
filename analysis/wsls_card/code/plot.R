@@ -3,7 +3,7 @@
 # Plot for video_present == TRUE
 p_with_video <- df_agg |>
   filter(video_present == TRUE) |>
-  ggplot(aes(x = reward_label, y = avg_stay, colour = participant_id)) +
+  ggplot(aes(x = reward_oneback, y = avg_stay, colour = participant_id)) +
   geom_point(size = 4, alpha = 0.7) +
   scale_colour_manual(values = participant_palette) +
   scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
@@ -23,7 +23,7 @@ p_with_video <- df_agg |>
 # Plot for video_present == FALSE
 p_without_video <- df_agg |>
   filter(video_present == FALSE) |>
-  ggplot(aes(x = reward_label, y = avg_stay, colour = participant_id)) +
+  ggplot(aes(x = reward_oneback, y = avg_stay, colour = participant_id)) +
   geom_point(size = 4, alpha = 0.7) +
   scale_colour_manual(values = participant_palette) +
   scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
@@ -45,7 +45,7 @@ p_without_video <- df_agg |>
 # Group-level plot for video_present == TRUE
 p_group_with_video <- df_agg |>
   filter(video_present == TRUE) |>
-  ggplot(aes(x = reward_label, y = avg_stay)) +
+  ggplot(aes(x = reward_oneback, y = avg_stay)) +
   stat_summary(fun = mean, geom = "point", size = 4, alpha = 0.8, color = "black") +
   stat_summary(fun = mean, geom = "line", aes(group = 1), color = "black", linewidth = 1.5, linetype = "solid") +
   scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
@@ -65,7 +65,7 @@ p_group_with_video <- df_agg |>
 # Group-level plot for video_present == FALSE
 p_group_without_video <- df_agg |>
   filter(video_present == FALSE) |>
-  ggplot(aes(x = reward_label, y = avg_stay)) +
+  ggplot(aes(x = reward_oneback, y = avg_stay)) +
   stat_summary(fun = mean, geom = "point", size = 4, alpha = 0.8, color = "black") +
   stat_summary(fun = mean, geom = "line", aes(group = 1), color = "black", linewidth = 1.5, linetype = "solid") +
   scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
