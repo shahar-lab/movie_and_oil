@@ -7,14 +7,20 @@ cat("Participant IDs:", paste(sort(unique(df$participant_id)), collapse = ", "),
 
 #### FILTER DATA ####
 
-df_analysis <- df |>
+# Step-by-step filtering to see where data is lost
+df_step1 <- df |>
   group_by(participant_id) |>
-  filter(offer_up == lag(choice_card) | offer_down == lag(choice_card)) |>
+  filter(offer_up == lag(choice_card) | offer_down == lag(choice_card))
+cat("After offer-matches-previous-choice filter:", nrow(df_step1), "rows\n")
+
+df_step2 <- df_step1 |>
   ungroup() |>
   filter(!is.na(reward_oneback)) |>
   mutate(reward_oneback = factor(reward_oneback, levels = c("loss", "win")))
 
-cat("After filtering:", nrow(df_analysis), "| Unique participants:", n_distinct(df_analysis$participant_id), "\n")
+df_analysis <- df_step2
+
+cat("After filtering reward_oneback NA:", nrow(df_analysis), "| Unique participants:", n_distinct(df_analysis$participant_id), "\n")
 
 #### AGGREGATE TO SUBJECT LEVEL ####
 
