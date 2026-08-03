@@ -19,3 +19,4 @@ data_path    <- file.path(project_root, "data", "processed",
 
 source(file.path(code_dir, "prepare_data.R"))
 source(file.path(code_dir, "plot_accuracy.R"))
+source(file.path(code_dir, "plot_learning_curve.R"))
